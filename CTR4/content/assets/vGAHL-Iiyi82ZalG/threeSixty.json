@@ -1,0 +1,27 @@
+{
+  "version": "3.67.28569.0",
+  "course_id": "6B5aqTpSZnO",
+  "title": "Activity4.1",
+  "thumbnail": "story_content/thumbnail.jpg",
+  "scenes": [
+    {
+      "title": "Untitled Scene"
+    }
+  ],
+  "slides": [
+    {
+      "id": "600XCJKgt2c",
+      "title": "Pick Many",
+      "scene_index": "1.1"
+    }
+  ],
+  "player": {
+    "name": "unified",
+    "width": 980,
+    "height": 658
+  },
+  "stage": {
+    "width": 720,
+    "height": 540
+  }
+}
