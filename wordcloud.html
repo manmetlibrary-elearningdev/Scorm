@@ -7,127 +7,121 @@
   <style>
     body {
       font-family: sans-serif;
-      background-color: #f5f5f5;
+      background: #f9f9f9;
       margin: 0;
       padding: 20px;
+      text-align: center;
     }
 
     h1 {
-      text-align: center;
       margin-bottom: 30px;
     }
 
     .slider-container {
-      text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
     }
 
-    .slider-container label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-    .slider-container input {
+    input[type="range"] {
       width: 60%;
       max-width: 400px;
     }
 
     .grid-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 20px;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .column {
       display: flex;
-      flex-direction: column;
-      align-items: center;
+      justify-content: center;
       min-height: 200px;
     }
 
-    .column span {
-      margin: 10px 0;
-      font-size: 18px;
-    }
-
-    .hidden {
+    .column {
       display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
     }
 
-    @media (max-width: 768px) {
-      .grid-container {
-        grid-template-columns: 1fr;
+    .term-card {
+      background: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      font-size: 18px;
+      width: fit-content;
+    }
+
+    .visible {
+      display: flex;
+    }
+
+    @media (max-width: 600px) {
+      input[type="range"] {
+        width: 90%;
       }
-      .column {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
+
+      .term-card {
+        font-size: 16px;
       }
     }
   </style>
 </head>
 <body>
 
-  <h1>Keyword Breadth Explorer</h1>
+  <h1>Keyword Breadth Selector</h1>
 
   <div class="slider-container">
-    <label for="breadth-slider">Drag the slider. to display narrower and broader terms.</label>
-    <input type="range" id="breadth-slider" min="0" max="100" value="50" aria-label="Adjust term specificity">
+    <label for="breadth-slider">Adjust Breadth</label><br>
+    <input type="range" id="breadth-slider" min="0" max="2" value="1" aria-label="Breadth selector">
     <div id="slider-label" role="status" aria-live="polite">Showing: Core Terms</div>
   </div>
 
-  <div class="grid-container" aria-label="Keyword Grid">
-    <div class="column" id="narrower-terms" aria-label="Narrower Terms">
-      <span data-group="narrower">Instagram</span>
-      <span data-group="narrower">Compulsive behaviour</span>
-      <span data-group="narrower">First year undergraduates</span>
+  <div class="grid-container">
+    <div class="column" id="narrower">
+      <div class="term-card">Instagram</div>
+      <div class="term-card">Compulsive behaviour</div>
+      <div class="term-card">First year undergraduates</div>
     </div>
-    <div class="column" id="core-terms" aria-label="Core Terms">
-      <span data-group="core">Social media</span>
-      <span data-group="core">Addiction</span>
-      <span data-group="core">University students</span>
+
+    <div class="column" id="core">
+      <div class="term-card">Social media</div>
+      <div class="term-card">Addiction</div>
+      <div class="term-card">University students</div>
     </div>
-    <div class="column" id="broader-terms" aria-label="Broader Terms">
-      <span data-group="broader">Online communication</span>
-      <span data-group="broader">Negative effects</span>
-      <span data-group="broader">Young people</span>
+
+    <div class="column" id="broader">
+      <div class="term-card">Online</div>
+      <div class="term-card">Negative effects</div>
+      <div class="term-card">Young people</div>
     </div>
   </div>
 
   <script>
     const slider = document.getElementById('breadth-slider');
     const label = document.getElementById('slider-label');
-
-    const updateVisibility = () => {
-      const value = parseInt(slider.value, 10);
-      const narrower = document.querySelectorAll('[data-group="narrower"]');
-      const broader = document.querySelectorAll('[data-group="broader"]');
-      const core = document.querySelectorAll('[data-group="core"]');
-
-      // Reset all
-      narrower.forEach(el => el.classList.add('hidden'));
-      broader.forEach(el => el.classList.add('hidden'));
-      core.forEach(el => el.classList.add('hidden'));
-
-      if (value <= 33) {
-        label.textContent = "Showing: Narrower Terms + Core Terms";
-        narrower.forEach(el => el.classList.remove('hidden'));
-        core.forEach(el => el.classList.remove('hidden'));
-      } else if (value >= 67) {
-        label.textContent = "Showing: Broader Terms + Core Terms";
-        broader.forEach(el => el.classList.remove('hidden'));
-        core.forEach(el => el.classList.remove('hidden'));
-      } else {
-        label.textContent = "Showing: Core Terms";
-        core.forEach(el => el.classList.remove('hidden'));
-      }
+    const columns = {
+      narrower: document.getElementById('narrower'),
+      core: document.getElementById('core'),
+      broader: document.getElementById('broader')
     };
 
-    slider.addEventListener('input', updateVisibility);
-    updateVisibility(); // Initial call
+    function updateView() {
+      const val = slider.value;
+
+      Object.values(columns).forEach(col => col.classList.remove('visible'));
+
+      if (val === '0') {
+        columns.narrower.classList.add('visible');
+        label.textContent = 'Showing: Narrower Terms';
+      } else if (val === '1') {
+        columns.core.classList.add('visible');
+        label.textContent = 'Showing: Core Terms';
+      } else {
+        columns.broader.classList.add('visible');
+        label.textContent = 'Showing: Broader Terms';
+      }
+    }
+
+    slider.addEventListener('input', updateView);
+    updateView();
   </script>
 
 </body>
