@@ -107,29 +107,29 @@
   </section>
 
   <section class="slider-container">
-    <label for="slider-breadth">Breadth: </label>
-    <input type="range" id="slider-breadth" min="0" max="100" value="50" aria-label="Adjust breadth from broader to narrower terms" />
+    <label for="slider-breadth">Move the slider to display broader and narrower terms.</label>
+    <input type="range" id="slider-breadth" min="0" max="100" value="50" aria-label="Move the slider to display broader and narrower terms" />
     <br>
-    <span id="breadth-label" role="status" aria-live="polite">Moderate Breadth (Both Broader and Narrower Terms)</span>
+    <span id="breadth-label" role="status" aria-live="polite">Text</span>
   </section>
 </main>
 
 <script>
   const wordGroups = {
     social: {
-      broader: ['online', 'digital life', 'communication'],
+      broader: ['social networks', 'online spaces', 'online communication'],
       focus: ['social media'],
-      narrower: ['Instagram', 'TikTok', 'likes & validation', 'group chats'],
+      narrower: ['Instagram', 'TikTok', 'social media likes', 'group chats'],
     },
     addiction: {
-      broader: ['negative effects', 'technology', 'media exposure'],
+      broader: ['negative effects', 'habit', 'excessive use', 'reliance', 'dependency'],
       focus: ['addiction'],
-      narrower: ['compulsive behaviour', 'doomscrolling'],
+      narrower: ['compulsive behaviour', 'internet addiction', 'doomscrolling'],
     },
     students: {
-      broader: ['young people', 'information age'],
+      broader: ['young people', 'young adults', 'generation Z'],
       focus: ['university students'],
-      narrower: ['first year undergraduates', 'peer influence', 'screen time', 'mental health'],
+      narrower: ['first year undergraduates', 'UK students', 'arts and humanities students'],
     }
   };
 
