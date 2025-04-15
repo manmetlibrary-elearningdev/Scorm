@@ -111,20 +111,20 @@
   };
 
   const wordGroups = {
-    broader: {
-      social: [['online', 25], ['digital life', 20], ['communication', 18]],
-      addiction: [['negative effects', 22], ['technology', 20], ['media exposure', 18]],
-      students: [['young people', 24], ['information age', 16]]
+    social: {
+      broader: [['online', 25], ['digital life', 20], ['communication', 18]],
+      focus: [['social media', 40]],
+      narrower: [['Instagram', 28], ['TikTok', 24], ['likes & validation', 18], ['group chats', 16]],
     },
-    focus: {
-      social: [['social media', 40]],
-      addiction: [['addiction', 35]],
-      students: [['university students', 30]]
+    addiction: {
+      broader: [['negative effects', 22], ['technology', 20], ['media exposure', 18]],
+      focus: [['addiction', 35]],
+      narrower: [['compulsive behaviour', 22], ['doomscrolling', 20]],
     },
-    narrower: {
-      social: [['Instagram', 28], ['TikTok', 24], ['likes & validation', 18], ['group chats', 16]],
-      addiction: [['compulsive behaviour', 22], ['doomscrolling', 20]],
-      students: [['first year undergraduates', 18], ['peer influence', 20], ['screen time', 22], ['mental health', 25]]
+    students: {
+      broader: [['young people', 24], ['information age', 16]],
+      focus: [['university students', 30]],
+      narrower: [['first year undergraduates', 18], ['peer influence', 20], ['screen time', 22], ['mental health', 25]],
     }
   };
 
@@ -135,34 +135,40 @@
   function renderCloud(targetId, dataGroup, filter, breadth) {
     const wordList = [];
 
-    for (const category in dataGroup) {
-      if (filter === 'all' || category === filter) {
-        const color = colors[category];
-        
-        let words = [];
-        if (breadth <= 33) {
-          // Display mostly broader terms
-          words = dataGroup.broader[category] || [];
-        } else if (breadth >= 67) {
-          // Display mostly narrower terms
-          words = dataGroup.narrower[category] || [];
-        } else {
-          // Display both broader and narrower terms
-          words = [...(dataGroup.broader[category] || []), ...(dataGroup.narrower[category] || [])];
-        }
-        
-        words.forEach(([word, weight]) => {
-          wordList.push([word, weight, color]);
-        });
-      }
+    // Determine which terms should appear based on the slider's position
+    if (breadth <= 33) {
+      // Show only broader terms
+      if (filter === 'all' || filter === 'social') wordList.push(...dataGroup.social.broader);
+      if (filter === 'all' || filter === 'addiction') wordList.push(...dataGroup.addiction.broader);
+      if (filter === 'all' || filter === 'students') wordList.push(...dataGroup.students.broader);
+    } else if (breadth >= 67) {
+      // Show only narrower terms
+      if (filter === 'all' || filter === 'social') wordList.push(...dataGroup.social.narrower);
+      if (filter === 'all' || filter === 'addiction') wordList.push(...dataGroup.addiction.narrower);
+      if (filter === 'all' || filter === 'students') wordList.push(...dataGroup.students.narrower);
+    } else {
+      // Show only focus terms (the starter keywords)
+      if (filter === 'all' || filter === 'social') wordList.push(...dataGroup.social.focus);
+      if (filter === 'all' || filter === 'addiction') wordList.push(...dataGroup.addiction.focus);
+      if (filter === 'all' || filter === 'students') wordList.push(...dataGroup.students.focus);
     }
 
+    // Map words to color
+    const coloredWordList = wordList.map(([word, weight]) => {
+      let color = '';
+      if (word === 'social media') color = colors.social;
+      else if (word === 'addiction') color = colors.addiction;
+      else if (word === 'university students') color = colors.students;
+      return [word, weight, color];
+    });
+
+    // Render the cloud
     WordCloud(document.getElementById(targetId), {
-      list: wordList,
+      list: coloredWordList,
       gridSize: 8,
       weightFactor: breadth / 10,  // Adjust word size based on breadth slider
       color: (word, weight) => {
-        const entry = wordList.find(item => item[0] === word);
+        const entry = coloredWordList.find(item => item[0] === word);
         return entry ? entry[2] : '#000';
       },
       backgroundColor: 'transparent',
