@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Grouped Word Clouds</title>
+  <title>Interactive Word Cloud</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.jsdelivr.net/npm/wordcloud@1.1.1/src/wordcloud2.min.js"></script>
   <style>
@@ -27,10 +27,10 @@
     main {
       max-width: 1200px;
       margin: auto;
+      text-align: center;
     }
 
     .filter-controls {
-      text-align: center;
       margin: 20px 0;
     }
 
@@ -44,27 +44,22 @@
       font-size: 16px;
     }
 
-    .clouds {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      justify-content: space-between;
-    }
-
-    .cloud {
-      flex: 1 1 300px;
-      height: 320px;
-      border: 2px solid #ddd;
-      background: #fff;
-      padding: 10px;
-      border-radius: 8px;
+    .cloud-container {
       position: relative;
+      height: 400px;
+      width: 100%;
+      background-color: rgba(0, 0, 0, 0.05);
+      margin: 20px 0;
+      border-radius: 12px;
     }
 
-    .cloud-title {
-      font-weight: bold;
-      text-align: center;
-      margin-bottom: 10px;
+    .slider-container {
+      margin: 20px 0;
+    }
+
+    .slider-container input {
+      width: 100%;
+      margin: 10px 0;
     }
 
     canvas {
@@ -74,13 +69,9 @@
     }
 
     @media (max-width: 768px) {
-      .clouds {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .cloud {
-        width: 100%;
+      .slider-container input {
+        width: 80%;
+        margin: auto;
       }
     }
   </style>
@@ -88,11 +79,11 @@
 <body>
 
 <main role="main">
-  <h1>Explore Keyword Contexts</h1>
+  <h1>Interactive Word Cloud</h1>
 
-  <section class="filter-controls" aria-label="Filter Controls">
+  <section class="filter-controls">
     <label for="filter">Filter by keyword group:</label>
-    <select id="filter" aria-controls="broader focus narrower">
+    <select id="filter" aria-controls="word-cloud" aria-label="Select keyword group">
       <option value="all">Show All</option>
       <option value="social">Social Media</option>
       <option value="addiction">Addiction</option>
@@ -100,24 +91,15 @@
     </select>
   </section>
 
-  <section class="clouds" aria-label="Keyword Word Clouds">
-    <!-- Broader Terms -->
-    <div class="cloud" aria-labelledby="title-broader">
-      <div id="title-broader" class="cloud-title">Broader Terms</div>
-      <canvas id="broader" aria-label="Broader Word Cloud"></canvas>
-    </div>
+  <section class="cloud-container">
+    <canvas id="word-cloud" aria-label="Word Cloud"></canvas>
+  </section>
 
-    <!-- Focus Terms -->
-    <div class="cloud" aria-labelledby="title-focus">
-      <div id="title-focus" class="cloud-title">Focus Terms</div>
-      <canvas id="focus" aria-label="Focus Word Cloud"></canvas>
-    </div>
-
-    <!-- Narrower Terms -->
-    <div class="cloud" aria-labelledby="title-narrower">
-      <div id="title-narrower" class="cloud-title">Narrower Terms</div>
-      <canvas id="narrower" aria-label="Narrower Word Cloud"></canvas>
-    </div>
+  <section class="slider-container">
+    <label for="slider-breadth">Breadth: </label>
+    <input type="range" id="slider-breadth" min="0" max="100" value="50" aria-label="Adjust breadth from broader to narrower terms" />
+    <br>
+    <span id="breadth-label" role="status" aria-live="polite">Moderate Breadth (Both Broader and Narrower Terms)</span>
   </section>
 </main>
 
@@ -146,13 +128,30 @@
     }
   };
 
-  function renderCloud(targetId, dataGroup, filter) {
+  let currentFilter = 'all';
+  let breadth = 50;  // Default breadth (middle)
+
+  // Function to render the word cloud based on breadth
+  function renderCloud(targetId, dataGroup, filter, breadth) {
     const wordList = [];
 
     for (const category in dataGroup) {
       if (filter === 'all' || category === filter) {
         const color = colors[category];
-        dataGroup[category].forEach(([word, weight]) => {
+        
+        let words = [];
+        if (breadth <= 33) {
+          // Display mostly broader terms
+          words = dataGroup.broader[category] || [];
+        } else if (breadth >= 67) {
+          // Display mostly narrower terms
+          words = dataGroup.narrower[category] || [];
+        } else {
+          // Display both broader and narrower terms
+          words = [...(dataGroup.broader[category] || []), ...(dataGroup.narrower[category] || [])];
+        }
+        
+        words.forEach(([word, weight]) => {
           wordList.push([word, weight, color]);
         });
       }
@@ -161,26 +160,43 @@
     WordCloud(document.getElementById(targetId), {
       list: wordList,
       gridSize: 8,
+      weightFactor: breadth / 10,  // Adjust word size based on breadth slider
       color: (word, weight) => {
         const entry = wordList.find(item => item[0] === word);
         return entry ? entry[2] : '#000';
       },
       backgroundColor: 'transparent',
       drawOutOfBound: false,
-      origin: [Math.floor(document.getElementById(targetId).offsetWidth / 2), 150]
+      minSize: 10,
+      maxSize: 100,
+      hover: (event, word, item) => {
+        item.style.fontWeight = 'bold';
+      },
+      drawMask: true,
+      rotationSteps: 2,
+      opacityThreshold: 0.8, // Keep words opaque enough
     });
   }
 
-  function renderAll(filter = 'all') {
-    renderCloud('broader', wordGroups.broader, filter);
-    renderCloud('focus', wordGroups.focus, filter);
-    renderCloud('narrower', wordGroups.narrower, filter);
+  // Function to render all clouds
+  function renderAll(filter = 'all', breadth = 50) {
+    renderCloud('word-cloud', wordGroups, filter, breadth);
   }
 
+  // Initial render
   renderAll();
 
+  // Filter word cloud based on selection
   document.getElementById('filter').addEventListener('change', (e) => {
-    renderAll(e.target.value);
+    currentFilter = e.target.value;
+    renderAll(currentFilter, breadth);
+  });
+
+  // Handle breadth slider change
+  document.getElementById('slider-breadth').addEventListener('input', (e) => {
+    breadth = e.target.value;
+    document.getElementById('breadth-label').textContent = breadth <= 33 ? 'Broader Terms' : breadth >= 67 ? 'Narrower Terms' : 'Moderate Breadth (Both Broader and Narrower Terms)';
+    renderAll(currentFilter, breadth);
   });
 </script>
 
