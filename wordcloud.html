@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Grouped Word Clouds</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/wordcloud@1.1.1/src/wordcloud2.min.js"></script>
+  <style>
+    :root {
+      --social: #ff6b6b;
+      --addiction: #4dabf7;
+      --students: #38d9a9;
+    }
+
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f9f9f9;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .filter-controls {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    label {
+      font-weight: bold;
+      margin-right: 8px;
+    }
+
+    select {
+      padding: 6px 10px;
+      font-size: 16px;
+    }
+
+    .clouds {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: space-between;
+    }
+
+    .cloud {
+      flex: 1 1 300px;
+      height: 320px;
+      border: 2px solid #ddd;
+      background: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .cloud-title {
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    @media (max-width: 768px) {
+      .clouds {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .cloud {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<main role="main">
+  <h1>Explore Keyword Contexts</h1>
+
+  <section class="filter-controls" aria-label="Filter Controls">
+    <label for="filter">Filter by keyword group:</label>
+    <select id="filter" aria-controls="broader focus narrower">
+      <option value="all">Show All</option>
+      <option value="social">Social Media</option>
+      <option value="addiction">Addiction</option>
+      <option value="students">University Students</option>
+    </select>
+  </section>
+
+  <section class="clouds" aria-label="Keyword Word Clouds">
+    <div class="cloud" aria-labelledby="title-broader">
+      <div id="title-broader" class="cloud-title">Broader Terms</div>
+      <div id="broader" aria-label="Broader Word Cloud"></div>
+    </div>
+
+    <div class="cloud" aria-labelledby="title-focus">
+      <div id="title-focus" class="cloud-title">Focus Terms</div>
+      <div id="focus" aria-label="Focus Word Cloud"></div>
+    </div>
+
+    <div class="cloud" aria-labelledby="title-narrower">
+      <div id="title-narrower" class="cloud-title">Narrower Terms</div>
+      <div id="narrower" aria-label="Narrower Word Cloud"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  const colors = {
+    social: 'var(--social)',
+    addiction: 'var(--addiction)',
+    students: 'var(--students)'
+  };
+
+  const wordGroups = {
+    broader: {
+      social: [['online', 25], ['digital life', 20], ['communication', 18]],
+      addiction: [['negative effects', 22], ['technology', 20], ['media exposure', 18]],
+      students: [['young people', 24], ['information age', 16]]
+    },
+    focus: {
+      social: [['social media', 40]],
+      addiction: [['addiction', 35]],
+      students: [['university students', 30]]
+    },
+    narrower: {
+      social: [['Instagram', 28], ['TikTok', 24], ['likes & validation', 18], ['group chats', 16]],
+      addiction: [['compulsive behaviour', 22], ['doomscrolling', 20]],
+      students: [['first year undergraduates', 18], ['peer influence', 20], ['screen time', 22], ['mental health', 25]]
+    }
+  };
+
+  function renderCloud(targetId, dataGroup, filter) {
+    const wordList = [];
+
+    for (const category in dataGroup) {
+      if (filter === 'all' || category === filter) {
+        const color = colors[category];
+        dataGroup[category].forEach(([word, weight]) => {
+          wordList.push([word, weight, color]);
+        });
+      }
+    }
+
+    WordCloud(document.getElementById(targetId), {
+      list: wordList,
+      gridSize: 8,
+      color: (word, weight) => {
+        const entry = wordList.find(item => item[0] === word);
+        return entry ? entry[2] : '#000';
+      },
+      backgroundColor: 'transparent',
+      drawOutOfBound: false,
+      origin: [Math.floor(document.getElementById(targetId).offsetWidth / 2), 150]
+    });
+  }
+
+  function renderAll(filter = 'all') {
+    renderCloud('broader', wordGroups.broader, filter);
+    renderCloud('focus', wordGroups.focus, filter);
+    renderCloud('narrower', wordGroups.narrower, filter);
+  }
+
+  renderAll();
+
+  document.getElementById('filter').addEventListener('change', (e) => {
+    renderAll(e.target.value);
+  });
+</script>
+
+</body>
+</html>
