@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Keyword Breadth Viewer</title>
+  <title>Keyword Viewer</title>
   <style>
     body {
       font-family: sans-serif;
@@ -38,6 +38,9 @@
       gap: 20px;
       max-width: 1000px;
       margin: 0 auto;
+      border: 2px solid #ccc;
+      padding: 10px;
+      background-color: #fff;
     }
 
     .grid-cell {
@@ -45,6 +48,10 @@
       flex-direction: column;
       align-items: center;
       gap: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #f9f9f9;
     }
 
     .term-card {
@@ -54,16 +61,15 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       font-size: 16px;
       max-width: 90%;
+      word-wrap: break-word;
+      text-align: center;
     }
 
-    .hidden {
+    .term-card.hidden {
       visibility: hidden;
-      height: 0;
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
     }
 
+    /* Adjust grid for smaller screens */
     @media (max-width: 768px) {
       .grid-wrapper {
         grid-template-columns: 1fr;
@@ -81,66 +87,67 @@
   <div class="slider-container">
     <input type="range" id="breadth-slider" min="0" max="2" value="1" aria-label="Breadth selector" />
     <div class="slider-labels">
-      <span>Narrow</span>
-      <span>Broad</span>
+      <span>Narrower</span>
+      <span>Broader</span>
     </div>
   </div>
 
   <div class="grid-wrapper">
     <!-- Row 1: Social Media -->
-    <div class="grid-cell" data-type="narrow social">
-      <div class="term-card" data-group="narrow">Instagram</div>
-      <div class="term-card" data-group="narrow">TikTok</div>
-      <div class="term-card" data-group="narrow">Group chats</div>
+    <div class="grid-cell">
+      <div class="term-card narrow">Instagram</div>
+      <div class="term-card narrow">TikTok</div>
+      <div class="term-card narrow">Group chats</div>
     </div>
-    <div class="grid-cell" data-type="core social">
-      <div class="term-card" data-group="core">Social media</div>
+    <div class="grid-cell">
+      <div class="term-card core">Social media</div>
     </div>
-    <div class="grid-cell" data-type="broad social">
-      <div class="term-card" data-group="broad">Social network</div>
-      <div class="term-card" data-group="broad">Online</div>
-      <div class="term-card" data-group="broad">Online communication</div>
+    <div class="grid-cell">
+      <div class="term-card broad">Social network</div>
+      <div class="term-card broad">Online</div>
+      <div class="term-card broad">Online communication</div>
     </div>
 
     <!-- Row 2: Addiction -->
-    <div class="grid-cell" data-type="narrow addiction">
-      <div class="term-card" data-group="narrow">Compulsive behaviour</div>
-      <div class="term-card" data-group="narrow">Internet addiction</div>
+    <div class="grid-cell">
+      <div class="term-card narrow">Compulsive behaviour</div>
+      <div class="term-card narrow">Internet addiction</div>
     </div>
-    <div class="grid-cell" data-type="core addiction">
-      <div class="term-card" data-group="core">Addiction</div>
+    <div class="grid-cell">
+      <div class="term-card core">Addiction</div>
     </div>
-    <div class="grid-cell" data-type="broad addiction">
-      <div class="term-card" data-group="broad">Negative effects</div>
-      <div class="term-card" data-group="broad">Reliance</div>
-      <div class="term-card" data-group="broad">Dependence</div>
+    <div class="grid-cell">
+      <div class="term-card broad">Negative effects</div>
+      <div class="term-card broad">Reliance</div>
+      <div class="term-card broad">Dependence</div>
     </div>
 
     <!-- Row 3: University Students -->
-    <div class="grid-cell" data-type="narrow university">
-      <div class="term-card" data-group="narrow">First year undergraduates</div>
-      <div class="term-card" data-group="narrow">History students</div>
-      <div class="term-card" data-group="narrow">Students in the UK</div>
+    <div class="grid-cell">
+      <div class="term-card narrow">First year undergraduates</div>
+      <div class="term-card narrow">History students</div>
+      <div class="term-card narrow">Students in the UK</div>
     </div>
-    <div class="grid-cell" data-type="core university">
-      <div class="term-card" data-group="core">University students</div>
+    <div class="grid-cell">
+      <div class="term-card core">University students</div>
     </div>
-    <div class="grid-cell" data-type="broad university">
-      <div class="term-card" data-group="broad">Young adults</div>
-      <div class="term-card" data-group="broad">Young people</div>
-      <div class="term-card" data-group="broad">Generation Z</div>
+    <div class="grid-cell">
+      <div class="term-card broad">Young adults</div>
+      <div class="term-card broad">Young people</div>
+      <div class="term-card broad">Generation Z</div>
     </div>
   </div>
 
   <script>
     const slider = document.getElementById('breadth-slider');
-    const narrowCards = document.querySelectorAll('[data-group="narrow"]');
-    const coreCards = document.querySelectorAll('[data-group="core"]');
-    const broadCards = document.querySelectorAll('[data-group="broad"]');
+    const narrowCards = document.querySelectorAll('.narrow');
+    const coreCards = document.querySelectorAll('.core');
+    const broadCards = document.querySelectorAll('.broad');
 
     function updateView() {
       const val = slider.value;
 
+      // Hide all cards first
       narrowCards.forEach(card => card.classList.add('hidden'));
       coreCards.forEach(card => card.classList.remove('hidden'));
       broadCards.forEach(card => card.classList.add('hidden'));
