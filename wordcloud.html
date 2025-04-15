@@ -2,200 +2,133 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Interactive Word Cloud (Simplified)</title>
+  <title>Keyword Breadth Grid</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
       font-family: sans-serif;
+      background-color: #f5f5f5;
       margin: 0;
       padding: 20px;
-      background: #f9f9f9;
-      color: #333;
     }
 
     h1 {
       text-align: center;
-    }
-
-    main {
-      max-width: 1200px;
-      margin: auto;
-      text-align: center;
-    }
-
-    .filter-controls {
-      margin: 20px 0;
-    }
-
-    label {
-      font-weight: bold;
-      margin-right: 8px;
-    }
-
-    select {
-      padding: 6px 10px;
-      font-size: 16px;
-    }
-
-    .cloud-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-top: 20px;
-      margin-bottom: 20px;
-    }
-
-    .word {
-      margin: 5px 10px;
-      font-size: 20px;
-      font-weight: bold;
-      color: #000;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .social {
-      color: #ff6b6b;
-    }
-
-    .addiction {
-      color: #4dabf7;
-    }
-
-    .students {
-      color: #38d9a9;
+      margin-bottom: 30px;
     }
 
     .slider-container {
-      margin: 20px 0;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .slider-container label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 10px;
     }
 
     .slider-container input {
-      width: 100%;
-      margin: 10px 0;
+      width: 60%;
+      max-width: 400px;
     }
 
-    #breadth-label {
-      font-weight: bold;
+    .grid-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 200px;
+    }
+
+    .column span {
+      margin: 10px 0;
+      font-size: 18px;
+    }
+
+    .hidden {
+      display: none;
     }
 
     @media (max-width: 768px) {
-      .slider-container input {
-        width: 80%;
-        margin: auto;
+      .grid-container {
+        grid-template-columns: 1fr;
+      }
+      .column {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
       }
     }
   </style>
 </head>
 <body>
 
-<main role="main">
-  <h1>Interactive Word Cloud (Simplified)</h1>
+  <h1>Keyword Breadth Explorer</h1>
 
-  <section class="filter-controls">
-    <label for="filter">Filter by keyword group:</label>
-    <select id="filter" aria-controls="word-cloud" aria-label="Select keyword group">
-      <option value="all">Show All</option>
-      <option value="social">Social Media</option>
-      <option value="addiction">Addiction</option>
-      <option value="students">University Students</option>
-    </select>
-  </section>
+  <div class="slider-container">
+    <label for="breadth-slider">Adjust Breadth</label>
+    <input type="range" id="breadth-slider" min="0" max="100" value="50" aria-label="Adjust term specificity">
+    <div id="slider-label" role="status" aria-live="polite">Showing: Core Terms</div>
+  </div>
 
-  <section class="cloud-container" id="word-cloud">
-    <!-- Words will be dynamically added here -->
-  </section>
+  <div class="grid-container" aria-label="Keyword Grid">
+    <div class="column" id="narrower-terms" aria-label="Narrower Terms">
+      <span data-group="narrower">Instagram</span>
+      <span data-group="narrower">Compulsive behaviour</span>
+      <span data-group="narrower">First year undergraduates</span>
+    </div>
+    <div class="column" id="core-terms" aria-label="Core Terms">
+      <span data-group="core">Social media</span>
+      <span data-group="core">Addiction</span>
+      <span data-group="core">University students</span>
+    </div>
+    <div class="column" id="broader-terms" aria-label="Broader Terms">
+      <span data-group="broader">Online communication</span>
+      <span data-group="broader">Negative effects</span>
+      <span data-group="broader">Young people</span>
+    </div>
+  </div>
 
-  <section class="slider-container">
-    <label for="slider-breadth">Move the slider to display broader and narrower terms.</label>
-    <input type="range" id="slider-breadth" min="0" max="100" value="50" aria-label="Move the slider to display broader and narrower terms" />
-    <br>
-    <span id="breadth-label" role="status" aria-live="polite">Text</span>
-  </section>
-</main>
+  <script>
+    const slider = document.getElementById('breadth-slider');
+    const label = document.getElementById('slider-label');
 
-<script>
-  const wordGroups = {
-    social: {
-      broader: ['social networks', 'online spaces', 'online communication'],
-      focus: ['social media'],
-      narrower: ['Instagram', 'TikTok', 'social media likes', 'group chats'],
-    },
-    addiction: {
-      broader: ['negative effects', 'habit', 'excessive use', 'reliance', 'dependency'],
-      focus: ['addiction'],
-      narrower: ['compulsive behaviour', 'internet addiction', 'doomscrolling'],
-    },
-    students: {
-      broader: ['young people', 'young adults', 'generation Z'],
-      focus: ['university students'],
-      narrower: ['first year undergraduates', 'UK students', 'arts and humanities students'],
-    }
-  };
+    const updateVisibility = () => {
+      const value = parseInt(slider.value, 10);
+      const narrower = document.querySelectorAll('[data-group="narrower"]');
+      const broader = document.querySelectorAll('[data-group="broader"]');
+      const core = document.querySelectorAll('[data-group="core"]');
 
-  let currentFilter = 'all';
-  let breadth = 50;  // Default breadth (middle)
+      // Reset all
+      narrower.forEach(el => el.classList.add('hidden'));
+      broader.forEach(el => el.classList.add('hidden'));
+      core.forEach(el => el.classList.add('hidden'));
 
-  // Function to render the word cloud based on breadth
-  function renderCloud() {
-    const wordContainer = document.getElementById('word-cloud');
-    wordContainer.innerHTML = '';  // Clear the previous content
-
-    // Determine the words to display based on breadth
-    let wordsToDisplay = [];
-
-    if (breadth <= 33) {
-      // Show only broader terms
-      if (currentFilter === 'all' || currentFilter === 'social') wordsToDisplay = wordsToDisplay.concat(wordGroups.social.broader);
-      if (currentFilter === 'all' || currentFilter === 'addiction') wordsToDisplay = wordsToDisplay.concat(wordGroups.addiction.broader);
-      if (currentFilter === 'all' || currentFilter === 'students') wordsToDisplay = wordsToDisplay.concat(wordGroups.students.broader);
-    } else if (breadth >= 67) {
-      // Show only narrower terms
-      if (currentFilter === 'all' || currentFilter === 'social') wordsToDisplay = wordsToDisplay.concat(wordGroups.social.narrower);
-      if (currentFilter === 'all' || currentFilter === 'addiction') wordsToDisplay = wordsToDisplay.concat(wordGroups.addiction.narrower);
-      if (currentFilter === 'all' || currentFilter === 'students') wordsToDisplay = wordsToDisplay.concat(wordGroups.students.narrower);
-    } else {
-      // Show focus terms (the starter keywords)
-      if (currentFilter === 'all' || currentFilter === 'social') wordsToDisplay = wordsToDisplay.concat(wordGroups.social.focus);
-      if (currentFilter === 'all' || currentFilter === 'addiction') wordsToDisplay = wordsToDisplay.concat(wordGroups.addiction.focus);
-      if (currentFilter === 'all' || currentFilter === 'students') wordsToDisplay = wordsToDisplay.concat(wordGroups.students.focus);
-    }
-
-    // Create HTML elements for each word
-    wordsToDisplay.forEach(word => {
-      const wordElement = document.createElement('span');
-      wordElement.classList.add('word');
-      
-      // Assign a color based on the category
-      if (wordGroups.social.focus.includes(word)) {
-        wordElement.classList.add('social');
-      } else if (wordGroups.addiction.focus.includes(word)) {
-        wordElement.classList.add('addiction');
-      } else if (wordGroups.students.focus.includes(word)) {
-        wordElement.classList.add('students');
+      if (value <= 33) {
+        label.textContent = "Showing: Narrower Terms + Core Terms";
+        narrower.forEach(el => el.classList.remove('hidden'));
+        core.forEach(el => el.classList.remove('hidden'));
+      } else if (value >= 67) {
+        label.textContent = "Showing: Broader Terms + Core Terms";
+        broader.forEach(el => el.classList.remove('hidden'));
+        core.forEach(el => el.classList.remove('hidden'));
+      } else {
+        label.textContent = "Showing: Core Terms";
+        core.forEach(el => el.classList.remove('hidden'));
       }
+    };
 
-      wordElement.textContent = word;
-      wordContainer.appendChild(wordElement);
-    });
-  }
-
-  // Function to handle filter change
-  document.getElementById('filter').addEventListener('change', (e) => {
-    currentFilter = e.target.value;
-    renderCloud();
-  });
-
-  // Function to handle breadth slider change
-  document.getElementById('slider-breadth').addEventListener('input', (e) => {
-    breadth = e.target.value;
-    document.getElementById('breadth-label').textContent = breadth <= 33 ? 'Broader Terms' : breadth >= 67 ? 'Narrower Terms' : 'Moderate Breadth (Both Broader and Narrower Terms)';
-    renderCloud();
-  });
-
-  // Initial render
-  renderCloud();
-</script>
+    slider.addEventListener('input', updateVisibility);
+    updateVisibility(); // Initial call
+  </script>
 
 </body>
 </html>
