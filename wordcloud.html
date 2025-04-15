@@ -70,6 +70,7 @@
     canvas {
       width: 100% !important;
       height: 100% !important;
+      display: block;
     }
 
     @media (max-width: 768px) {
@@ -100,19 +101,22 @@
   </section>
 
   <section class="clouds" aria-label="Keyword Word Clouds">
+    <!-- Broader Terms -->
     <div class="cloud" aria-labelledby="title-broader">
       <div id="title-broader" class="cloud-title">Broader Terms</div>
-      <div id="broader" aria-label="Broader Word Cloud"></div>
+      <canvas id="broader" aria-label="Broader Word Cloud"></canvas>
     </div>
 
+    <!-- Focus Terms -->
     <div class="cloud" aria-labelledby="title-focus">
       <div id="title-focus" class="cloud-title">Focus Terms</div>
-      <div id="focus" aria-label="Focus Word Cloud"></div>
+      <canvas id="focus" aria-label="Focus Word Cloud"></canvas>
     </div>
 
+    <!-- Narrower Terms -->
     <div class="cloud" aria-labelledby="title-narrower">
       <div id="title-narrower" class="cloud-title">Narrower Terms</div>
-      <div id="narrower" aria-label="Narrower Word Cloud"></div>
+      <canvas id="narrower" aria-label="Narrower Word Cloud"></canvas>
     </div>
   </section>
 </main>
