@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
- 
+
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
@@ -21,23 +21,36 @@
       margin-bottom: 30px;
     }
 
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      max-width: 400px;
+      margin: 8px auto 0;
+      font-size: 14px;
+      color: #666;
+    }
+
     input[type="range"] {
       width: 60%;
       max-width: 400px;
     }
 
     .grid-container {
-      display: flex;
-      justify-content: center;
-      min-height: 200px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+      padding-top: 20px;
     }
 
     .column {
-      display: none;
+      display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 15px;
+      min-height: 200px;
     }
 
     .term-card {
@@ -49,79 +62,76 @@
       width: fit-content;
     }
 
-    .visible {
-      display: flex;
+    .hidden {
+      visibility: hidden;
     }
 
     @media (max-width: 600px) {
-      input[type="range"] {
-        width: 90%;
+      .grid-container {
+        grid-template-columns: 1fr;
       }
-
-      .term-card {
-        font-size: 16px;
+      .slider-labels {
+        display: none;
       }
     }
   </style>
 </head>
 <body>
 
-  <h1>Keyword Breadth Selector</h1>
+
 
   <div class="slider-container">
-    <label for="breadth-slider">Adjust Breadth</label><br>
+    <label for="breadth-slider" class="visually-hidden">
     <input type="range" id="breadth-slider" min="0" max="2" value="1" aria-label="Breadth selector">
-    <div id="slider-label" role="status" aria-live="polite">Showing: Core Terms</div>
+    <div class="slider-labels">
+      <span>Narrow</span>
+      <span>Broad</span>
+    </div>
   </div>
 
-  <div class="grid-container">
-    <div class="column" id="narrower">
-      <div class="term-card">Instagram</div>
-      <div class="term-card">Compulsive behaviour</div>
-      <div class="term-card">First year undergraduates</div>
+  <div class="grid-container" aria-label="Keyword Grid">
+    <div class="column" id="narrower-col">
+      <div class="term-card" data-group="narrow">Instagram</div>
+      <div class="term-card" data-group="narrow">Compulsive behaviour</div>
+      <div class="term-card" data-group="narrow">First year undergraduates</div>
     </div>
 
-    <div class="column" id="core">
-      <div class="term-card">Social media</div>
-      <div class="term-card">Addiction</div>
-      <div class="term-card">University students</div>
+    <div class="column" id="core-col">
+      <div class="term-card" data-group="core">Social media</div>
+      <div class="term-card" data-group="core">Addiction</div>
+      <div class="term-card" data-group="core">University students</div>
     </div>
 
-    <div class="column" id="broader">
-      <div class="term-card">Online</div>
-      <div class="term-card">Negative effects</div>
-      <div class="term-card">Young people</div>
+    <div class="column" id="broader-col">
+      <div class="term-card" data-group="broad">Online</div>
+      <div class="term-card" data-group="broad">Negative effects</div>
+      <div class="term-card" data-group="broad">Young people</div>
     </div>
   </div>
 
   <script>
     const slider = document.getElementById('breadth-slider');
-    const label = document.getElementById('slider-label');
-    const columns = {
-      narrower: document.getElementById('narrower'),
-      core: document.getElementById('core'),
-      broader: document.getElementById('broader')
-    };
+    const narrowCol = document.getElementById('narrower-col').querySelectorAll('[data-group="narrow"]');
+    const coreCol = document.getElementById('core-col').querySelectorAll('[data-group="core"]');
+    const broadCol = document.getElementById('broader-col').querySelectorAll('[data-group="broad"]');
 
     function updateView() {
       const val = slider.value;
 
-      Object.values(columns).forEach(col => col.classList.remove('visible'));
+      // Reset all
+      narrowCol.forEach(el => el.classList.add('hidden'));
+      broadCol.forEach(el => el.classList.add('hidden'));
+      coreCol.forEach(el => el.classList.remove('hidden')); // Always show core
 
       if (val === '0') {
-        columns.narrower.classList.add('visible');
-        label.textContent = 'Showing: Narrower Terms';
-      } else if (val === '1') {
-        columns.core.classList.add('visible');
-        label.textContent = 'Showing: Core Terms';
-      } else {
-        columns.broader.classList.add('visible');
-        label.textContent = 'Showing: Broader Terms';
+        narrowCol.forEach(el => el.classList.remove('hidden'));
+      } else if (val === '2') {
+        broadCol.forEach(el => el.classList.remove('hidden'));
       }
     }
 
     slider.addEventListener('input', updateView);
-    updateView();
+    updateView(); // Initial call
   </script>
 
 </body>
