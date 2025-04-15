@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
- 
+  <title>Keyword Breadth Viewer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
@@ -11,10 +11,6 @@
       margin: 0;
       padding: 20px;
       text-align: center;
-    }
-
-    h1 {
-      margin-bottom: 30px;
     }
 
     .slider-container {
@@ -84,14 +80,12 @@
 </head>
 <body>
 
-
-
   <div class="slider-container">
-   
+    <label for="breadth-slider" class="visually-hidden">Adjust Breadth</label>
     <input type="range" id="breadth-slider" min="0" max="2" value="1" aria-label="Breadth selector">
     <div class="slider-labels">
-      <span>Narrower</span>
-      <span>Broader</span>
+      <span>Narrow</span>
+      <span>Broad</span>
     </div>
   </div>
 
