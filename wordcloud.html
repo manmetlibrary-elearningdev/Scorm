@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Keyword Breadth Viewer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
       font-family: sans-serif;
@@ -31,33 +31,29 @@
       max-width: 400px;
     }
 
-    .grid-container {
+    .grid-wrapper {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: auto auto auto;
       gap: 20px;
-      max-width: 1100px;
+      max-width: 1000px;
       margin: 0 auto;
-      padding-top: 20px;
     }
 
-    .column {
+    .grid-cell {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      gap: 12px;
-      min-height: 250px;
+      gap: 10px;
     }
 
     .term-card {
       background: #fff;
-      padding: 10px 16px;
+      padding: 8px 14px;
       border-radius: 8px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       font-size: 16px;
-      width: fit-content;
       max-width: 90%;
-      word-wrap: break-word;
     }
 
     .hidden {
@@ -69,11 +65,13 @@
     }
 
     @media (max-width: 768px) {
-      .grid-container {
+      .grid-wrapper {
         grid-template-columns: 1fr;
+        grid-template-rows: repeat(9, auto);
       }
       .slider-labels {
-        display: none;
+        justify-content: space-between;
+        padding: 0 20px;
       }
     }
   </style>
@@ -81,48 +79,53 @@
 <body>
 
   <div class="slider-container">
-    <label for="breadth-slider" class="visually-hidden">Adjust Breadth</label>
-    <input type="range" id="breadth-slider" min="0" max="2" value="1" aria-label="Breadth selector">
+    <input type="range" id="breadth-slider" min="0" max="2" value="1" aria-label="Breadth selector" />
     <div class="slider-labels">
       <span>Narrow</span>
       <span>Broad</span>
     </div>
   </div>
 
-  <div class="grid-container" aria-label="Keyword Grid">
-    <!-- Narrower Terms -->
-    <div class="column" id="narrower-col">
-      <!-- Social Media -->
+  <div class="grid-wrapper">
+    <!-- Row 1: Social Media -->
+    <div class="grid-cell" data-type="narrow social">
       <div class="term-card" data-group="narrow">Instagram</div>
       <div class="term-card" data-group="narrow">TikTok</div>
       <div class="term-card" data-group="narrow">Group chats</div>
-      <!-- Addiction -->
+    </div>
+    <div class="grid-cell" data-type="core social">
+      <div class="term-card" data-group="core">Social media</div>
+    </div>
+    <div class="grid-cell" data-type="broad social">
+      <div class="term-card" data-group="broad">Social network</div>
+      <div class="term-card" data-group="broad">Online</div>
+      <div class="term-card" data-group="broad">Online communication</div>
+    </div>
+
+    <!-- Row 2: Addiction -->
+    <div class="grid-cell" data-type="narrow addiction">
       <div class="term-card" data-group="narrow">Compulsive behaviour</div>
       <div class="term-card" data-group="narrow">Internet addiction</div>
-      <!-- University Students -->
+    </div>
+    <div class="grid-cell" data-type="core addiction">
+      <div class="term-card" data-group="core">Addiction</div>
+    </div>
+    <div class="grid-cell" data-type="broad addiction">
+      <div class="term-card" data-group="broad">Negative effects</div>
+      <div class="term-card" data-group="broad">Reliance</div>
+      <div class="term-card" data-group="broad">Dependence</div>
+    </div>
+
+    <!-- Row 3: University Students -->
+    <div class="grid-cell" data-type="narrow university">
       <div class="term-card" data-group="narrow">First year undergraduates</div>
       <div class="term-card" data-group="narrow">History students</div>
       <div class="term-card" data-group="narrow">Students in the UK</div>
     </div>
-
-    <!-- Core Terms -->
-    <div class="column" id="core-col">
-      <div class="term-card" data-group="core">Social media</div>
-      <div class="term-card" data-group="core">Addiction</div>
+    <div class="grid-cell" data-type="core university">
       <div class="term-card" data-group="core">University students</div>
     </div>
-
-    <!-- Broader Terms -->
-    <div class="column" id="broader-col">
-      <!-- Social Media -->
-      <div class="term-card" data-group="broad">Social network</div>
-      <div class="term-card" data-group="broad">Online</div>
-      <div class="term-card" data-group="broad">Online communication</div>
-      <!-- Addiction -->
-      <div class="term-card" data-group="broad">Negative effects</div>
-      <div class="term-card" data-group="broad">Reliance</div>
-      <div class="term-card" data-group="broad">Dependence</div>
-      <!-- University Students -->
+    <div class="grid-cell" data-type="broad university">
       <div class="term-card" data-group="broad">Young adults</div>
       <div class="term-card" data-group="broad">Young people</div>
       <div class="term-card" data-group="broad">Generation Z</div>
@@ -131,27 +134,26 @@
 
   <script>
     const slider = document.getElementById('breadth-slider');
-    const narrowCol = document.getElementById('narrower-col').querySelectorAll('[data-group="narrow"]');
-    const coreCol = document.getElementById('core-col').querySelectorAll('[data-group="core"]');
-    const broadCol = document.getElementById('broader-col').querySelectorAll('[data-group="broad"]');
+    const narrowCards = document.querySelectorAll('[data-group="narrow"]');
+    const coreCards = document.querySelectorAll('[data-group="core"]');
+    const broadCards = document.querySelectorAll('[data-group="broad"]');
 
     function updateView() {
       const val = slider.value;
 
-      // Reset visibility
-      narrowCol.forEach(el => el.classList.add('hidden'));
-      broadCol.forEach(el => el.classList.add('hidden'));
-      coreCol.forEach(el => el.classList.remove('hidden')); // Always show core
+      narrowCards.forEach(card => card.classList.add('hidden'));
+      coreCards.forEach(card => card.classList.remove('hidden'));
+      broadCards.forEach(card => card.classList.add('hidden'));
 
       if (val === '0') {
-        narrowCol.forEach(el => el.classList.remove('hidden'));
+        narrowCards.forEach(card => card.classList.remove('hidden'));
       } else if (val === '2') {
-        broadCol.forEach(el => el.classList.remove('hidden'));
+        broadCards.forEach(card => card.classList.remove('hidden'));
       }
     }
 
     slider.addEventListener('input', updateView);
-    updateView(); // Initial render
+    updateView();
   </script>
 
 </body>
