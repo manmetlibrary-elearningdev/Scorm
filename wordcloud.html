@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-
+ 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
@@ -39,7 +39,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 20px;
-      max-width: 900px;
+      max-width: 1100px;
       margin: 0 auto;
       padding-top: 20px;
     }
@@ -48,25 +48,31 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 15px;
-      min-height: 200px;
+      justify-content: flex-start;
+      gap: 12px;
+      min-height: 250px;
     }
 
     .term-card {
       background: #fff;
-      padding: 12px 20px;
+      padding: 10px 16px;
       border-radius: 8px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      font-size: 18px;
+      font-size: 16px;
       width: fit-content;
+      max-width: 90%;
+      word-wrap: break-word;
     }
 
     .hidden {
       visibility: hidden;
+      height: 0;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
       .grid-container {
         grid-template-columns: 1fr;
       }
@@ -81,7 +87,7 @@
 
 
   <div class="slider-container">
-    <label for="breadth-slider" class="visually-hidden">
+   
     <input type="range" id="breadth-slider" min="0" max="2" value="1" aria-label="Breadth selector">
     <div class="slider-labels">
       <span>Narrower</span>
@@ -90,22 +96,42 @@
   </div>
 
   <div class="grid-container" aria-label="Keyword Grid">
+    <!-- Narrower Terms -->
     <div class="column" id="narrower-col">
+      <!-- Social Media -->
       <div class="term-card" data-group="narrow">Instagram</div>
+      <div class="term-card" data-group="narrow">TikTok</div>
+      <div class="term-card" data-group="narrow">Group chats</div>
+      <!-- Addiction -->
       <div class="term-card" data-group="narrow">Compulsive behaviour</div>
+      <div class="term-card" data-group="narrow">Internet addiction</div>
+      <!-- University Students -->
       <div class="term-card" data-group="narrow">First year undergraduates</div>
+      <div class="term-card" data-group="narrow">History students</div>
+      <div class="term-card" data-group="narrow">Students in the UK</div>
     </div>
 
+    <!-- Core Terms -->
     <div class="column" id="core-col">
       <div class="term-card" data-group="core">Social media</div>
       <div class="term-card" data-group="core">Addiction</div>
       <div class="term-card" data-group="core">University students</div>
     </div>
 
+    <!-- Broader Terms -->
     <div class="column" id="broader-col">
+      <!-- Social Media -->
+      <div class="term-card" data-group="broad">Social network</div>
       <div class="term-card" data-group="broad">Online</div>
+      <div class="term-card" data-group="broad">Online communication</div>
+      <!-- Addiction -->
       <div class="term-card" data-group="broad">Negative effects</div>
+      <div class="term-card" data-group="broad">Reliance</div>
+      <div class="term-card" data-group="broad">Dependence</div>
+      <!-- University Students -->
+      <div class="term-card" data-group="broad">Young adults</div>
       <div class="term-card" data-group="broad">Young people</div>
+      <div class="term-card" data-group="broad">Generation Z</div>
     </div>
   </div>
 
@@ -118,7 +144,7 @@
     function updateView() {
       const val = slider.value;
 
-      // Reset all
+      // Reset visibility
       narrowCol.forEach(el => el.classList.add('hidden'));
       broadCol.forEach(el => el.classList.add('hidden'));
       coreCol.forEach(el => el.classList.remove('hidden')); // Always show core
@@ -131,7 +157,7 @@
     }
 
     slider.addEventListener('input', updateView);
-    updateView(); // Initial call
+    updateView(); // Initial render
   </script>
 
 </body>
