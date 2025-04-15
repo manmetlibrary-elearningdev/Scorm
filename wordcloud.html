@@ -2,16 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Interactive Word Cloud</title>
+  <title>Interactive Word Cloud (Simplified)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://cdn.jsdelivr.net/npm/wordcloud@1.1.1/src/wordcloud2.min.js"></script>
   <style>
-    :root {
-      --social: #ff6b6b;
-      --addiction: #4dabf7;
-      --students: #38d9a9;
-    }
-
     body {
       font-family: sans-serif;
       margin: 0;
@@ -45,12 +38,32 @@
     }
 
     .cloud-container {
-      position: relative;
-      height: 400px;
-      width: 100%;
-      background-color: rgba(0, 0, 0, 0.05);
-      margin: 20px 0;
-      border-radius: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+
+    .word {
+      margin: 5px 10px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #000;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .social {
+      color: #ff6b6b;
+    }
+
+    .addiction {
+      color: #4dabf7;
+    }
+
+    .students {
+      color: #38d9a9;
     }
 
     .slider-container {
@@ -62,10 +75,8 @@
       margin: 10px 0;
     }
 
-    canvas {
-      width: 100% !important;
-      height: 100% !important;
-      display: block;
+    #breadth-label {
+      font-weight: bold;
     }
 
     @media (max-width: 768px) {
@@ -79,7 +90,7 @@
 <body>
 
 <main role="main">
-  <h1>Interactive Word Cloud</h1>
+  <h1>Interactive Word Cloud (Simplified)</h1>
 
   <section class="filter-controls">
     <label for="filter">Filter by keyword group:</label>
@@ -91,8 +102,8 @@
     </select>
   </section>
 
-  <section class="cloud-container">
-    <canvas id="word-cloud" aria-label="Word Cloud"></canvas>
+  <section class="cloud-container" id="word-cloud">
+    <!-- Words will be dynamically added here -->
   </section>
 
   <section class="slider-container">
@@ -104,27 +115,21 @@
 </main>
 
 <script>
-  const colors = {
-    social: 'var(--social)',
-    addiction: 'var(--addiction)',
-    students: 'var(--students)'
-  };
-
   const wordGroups = {
     social: {
-      broader: [['online', 25], ['digital life', 20], ['communication', 18]],
-      focus: [['social media', 40]],
-      narrower: [['Instagram', 28], ['TikTok', 24], ['likes & validation', 18], ['group chats', 16]],
+      broader: ['online', 'digital life', 'communication'],
+      focus: ['social media'],
+      narrower: ['Instagram', 'TikTok', 'likes & validation', 'group chats'],
     },
     addiction: {
-      broader: [['negative effects', 22], ['technology', 20], ['media exposure', 18]],
-      focus: [['addiction', 35]],
-      narrower: [['compulsive behaviour', 22], ['doomscrolling', 20]],
+      broader: ['negative effects', 'technology', 'media exposure'],
+      focus: ['addiction'],
+      narrower: ['compulsive behaviour', 'doomscrolling'],
     },
     students: {
-      broader: [['young people', 24], ['information age', 16]],
-      focus: [['university students', 30]],
-      narrower: [['first year undergraduates', 18], ['peer influence', 20], ['screen time', 22], ['mental health', 25]],
+      broader: ['young people', 'information age'],
+      focus: ['university students'],
+      narrower: ['first year undergraduates', 'peer influence', 'screen time', 'mental health'],
     }
   };
 
@@ -132,78 +137,64 @@
   let breadth = 50;  // Default breadth (middle)
 
   // Function to render the word cloud based on breadth
-  function renderCloud(targetId, dataGroup, filter, breadth) {
-    const wordList = [];
+  function renderCloud() {
+    const wordContainer = document.getElementById('word-cloud');
+    wordContainer.innerHTML = '';  // Clear the previous content
 
-    // Determine which terms should appear based on the slider's position
+    // Determine the words to display based on breadth
+    let wordsToDisplay = [];
+
     if (breadth <= 33) {
       // Show only broader terms
-      if (filter === 'all' || filter === 'social') wordList.push(...dataGroup.social.broader);
-      if (filter === 'all' || filter === 'addiction') wordList.push(...dataGroup.addiction.broader);
-      if (filter === 'all' || filter === 'students') wordList.push(...dataGroup.students.broader);
+      if (currentFilter === 'all' || currentFilter === 'social') wordsToDisplay = wordsToDisplay.concat(wordGroups.social.broader);
+      if (currentFilter === 'all' || currentFilter === 'addiction') wordsToDisplay = wordsToDisplay.concat(wordGroups.addiction.broader);
+      if (currentFilter === 'all' || currentFilter === 'students') wordsToDisplay = wordsToDisplay.concat(wordGroups.students.broader);
     } else if (breadth >= 67) {
       // Show only narrower terms
-      if (filter === 'all' || filter === 'social') wordList.push(...dataGroup.social.narrower);
-      if (filter === 'all' || filter === 'addiction') wordList.push(...dataGroup.addiction.narrower);
-      if (filter === 'all' || filter === 'students') wordList.push(...dataGroup.students.narrower);
+      if (currentFilter === 'all' || currentFilter === 'social') wordsToDisplay = wordsToDisplay.concat(wordGroups.social.narrower);
+      if (currentFilter === 'all' || currentFilter === 'addiction') wordsToDisplay = wordsToDisplay.concat(wordGroups.addiction.narrower);
+      if (currentFilter === 'all' || currentFilter === 'students') wordsToDisplay = wordsToDisplay.concat(wordGroups.students.narrower);
     } else {
-      // Show only focus terms (the starter keywords)
-      if (filter === 'all' || filter === 'social') wordList.push(...dataGroup.social.focus);
-      if (filter === 'all' || filter === 'addiction') wordList.push(...dataGroup.addiction.focus);
-      if (filter === 'all' || filter === 'students') wordList.push(...dataGroup.students.focus);
+      // Show focus terms (the starter keywords)
+      if (currentFilter === 'all' || currentFilter === 'social') wordsToDisplay = wordsToDisplay.concat(wordGroups.social.focus);
+      if (currentFilter === 'all' || currentFilter === 'addiction') wordsToDisplay = wordsToDisplay.concat(wordGroups.addiction.focus);
+      if (currentFilter === 'all' || currentFilter === 'students') wordsToDisplay = wordsToDisplay.concat(wordGroups.students.focus);
     }
 
-    // Map words to color
-    const coloredWordList = wordList.map(([word, weight]) => {
-      let color = '';
-      if (word === 'social media') color = colors.social;
-      else if (word === 'addiction') color = colors.addiction;
-      else if (word === 'university students') color = colors.students;
-      return [word, weight, color];
-    });
+    // Create HTML elements for each word
+    wordsToDisplay.forEach(word => {
+      const wordElement = document.createElement('span');
+      wordElement.classList.add('word');
+      
+      // Assign a color based on the category
+      if (wordGroups.social.focus.includes(word)) {
+        wordElement.classList.add('social');
+      } else if (wordGroups.addiction.focus.includes(word)) {
+        wordElement.classList.add('addiction');
+      } else if (wordGroups.students.focus.includes(word)) {
+        wordElement.classList.add('students');
+      }
 
-    // Render the cloud
-    WordCloud(document.getElementById(targetId), {
-      list: coloredWordList,
-      gridSize: 8,
-      weightFactor: breadth / 10,  // Adjust word size based on breadth slider
-      color: (word, weight) => {
-        const entry = coloredWordList.find(item => item[0] === word);
-        return entry ? entry[2] : '#000';
-      },
-      backgroundColor: 'transparent',
-      drawOutOfBound: false,
-      minSize: 10,
-      maxSize: 100,
-      hover: (event, word, item) => {
-        item.style.fontWeight = 'bold';
-      },
-      drawMask: true,
-      rotationSteps: 2,
-      opacityThreshold: 0.8, // Keep words opaque enough
+      wordElement.textContent = word;
+      wordContainer.appendChild(wordElement);
     });
   }
 
-  // Function to render all clouds
-  function renderAll(filter = 'all', breadth = 50) {
-    renderCloud('word-cloud', wordGroups, filter, breadth);
-  }
-
-  // Initial render
-  renderAll();
-
-  // Filter word cloud based on selection
+  // Function to handle filter change
   document.getElementById('filter').addEventListener('change', (e) => {
     currentFilter = e.target.value;
-    renderAll(currentFilter, breadth);
+    renderCloud();
   });
 
-  // Handle breadth slider change
+  // Function to handle breadth slider change
   document.getElementById('slider-breadth').addEventListener('input', (e) => {
     breadth = e.target.value;
     document.getElementById('breadth-label').textContent = breadth <= 33 ? 'Broader Terms' : breadth >= 67 ? 'Narrower Terms' : 'Moderate Breadth (Both Broader and Narrower Terms)';
-    renderAll(currentFilter, breadth);
+    renderCloud();
   });
+
+  // Initial render
+  renderCloud();
 </script>
 
 </body>
